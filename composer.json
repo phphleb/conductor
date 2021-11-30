@@ -1,0 +1,22 @@
+{
+    "name": "phphleb/conductor",
+    "description": "Mutexes for Micro-Framework HLEB",
+    "type": "library",
+    "keywords": [
+        "mutex",
+        "php"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Foma Tuturov",
+            "email": "fomiash@yandex.ru"
+        }
+    ],
+    "require": {
+        "php": ">=7.4.0",
+        "phphleb/updater": "*",
+        "ext-readline": "*"
+    },
+    "minimum-stability": "dev"
+}
