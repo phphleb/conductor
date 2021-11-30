@@ -1,35 +1,34 @@
 <?php
 declare(strict_types=1);
-
 /**
- * A query processor for a database-based mutex store.
+ * Predis-based mutex store request handler.
  *
- * Обработчик запросов в хранилище мьютексов на основе БД.
+ * Обработчик запросов в хранилище мьютексов на основе Predis.
  */
 
-namespace Phphleb\Conductor\Src\Storage\DB;
+namespace Phphleb\Conductor\Src\Storage\Predis;
 
 use Phphleb\Conductor\Src\Scheme\BaseConfigInterface;
 use Phphleb\Conductor\Src\Storage\BaseStorage;
-use Phphleb\Conductor\Src\Scheme\DbConfigInterface;
+use Phphleb\Conductor\Src\Scheme\PredisConfigInterface;
 use Phphleb\Conductor\Src\Scheme\StorageInterface;
 
-class DbStorage extends BaseStorage implements StorageInterface
+class PredisStorage extends BaseStorage implements StorageInterface
 {
     protected string $mutexName;
 
     protected string $mutexId;
 
-    protected DbConfigInterface $config;
+    protected PredisConfigInterface $config;
 
-    protected static ?TagDbManager $tagManager = null;
+    protected static ?TagPredisManager $tagManager = null;
 
     protected int $unlockSeconds = 0;
 
     protected int $revisionTime = 0;
 
-    protected string $processHash;    
-    
+    protected string $processHash;
+
     public function __construct(string $mutexName, BaseConfigInterface $config)
     {
         $this->mutexName = $mutexName;
@@ -38,7 +37,7 @@ class DbStorage extends BaseStorage implements StorageInterface
         $this->processHash = microtime(true) . '-' . rand();
 
         if (is_null(self::$tagManager)) {
-            self::$tagManager = new TagDbManager($config);
+            self::$tagManager = new TagPredisManager($config);
         }
     }
 
@@ -49,7 +48,7 @@ class DbStorage extends BaseStorage implements StorageInterface
     {
         return $this->config;
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -59,11 +58,11 @@ class DbStorage extends BaseStorage implements StorageInterface
 
         $this->revisionTime = $revisionTime;
 
-        $this->prepareDbResources();
+        $this->preparePredisResources();
 
         return $this->createTag();
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -75,15 +74,15 @@ class DbStorage extends BaseStorage implements StorageInterface
         }
         return false;
     }
-    
+
     /**
      * @inheritDoc
-     */   
+     */
     public function checkLockedTagExists(): bool
     {
         return self::$tagManager->getLockTagExists($this->mutexId, $this->processHash);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -91,7 +90,7 @@ class DbStorage extends BaseStorage implements StorageInterface
     {
         return self::$tagManager->deleteLockedTag($this->mutexId, $this->processHash);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -99,13 +98,11 @@ class DbStorage extends BaseStorage implements StorageInterface
     {
         return sha1($name);
     }
-    
-    protected function prepareDbResources(): void
+
+    protected function preparePredisResources(): void
     {
-        if (!self::$tagManager->checkAndcreateTable()) {
-            if (rand(0, 5) === 1) {
-                self::$tagManager->deleteExpiredTags();
-            }
+        if (rand(0, 20) === 1) {
+            self::$tagManager->deleteExpiredTags();
         }
     }
 

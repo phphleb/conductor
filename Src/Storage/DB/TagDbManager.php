@@ -70,16 +70,16 @@ class TagDbManager
      *
      * Возвращает объект по параметрам.
      *
-     * @param int $revisionTime - the Unix system timestamp when the lock was completed.
+     * @param int $revisionTime  - the Unix system timestamp when the lock was completed.
      *                           - метка системного времени Unix завершения блокировки.
      *
      * @param int $unlockSeconds - the number of seconds to block.
      *                           - количество секунд блокировки.
      *
-     * @param string $hash - identifier of the current process.
+     * @param string $hash       - identifier of the current process.
      *                           - идентификатор текущего процесса.
      *
-     * @param string $name - custom mutex name.
+     * @param string $name       - custom mutex name.
      *                           - пользовательское название мьютекса.
      *
      * @return Tag
@@ -114,7 +114,7 @@ class TagDbManager
 
             // If the table is not created.
         }
-        return false;
+        return null;
     }
 
     public function getLockTagExists(string $tagId, string $hash): bool

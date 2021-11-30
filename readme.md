@@ -71,6 +71,20 @@ $mutex = new DbMutex();
 
 ```
 
+ ### PredisMutex
+ 
+ Redis is connected in the same way.
+ 
+ ```php
+ use \Phphleb\Conductor\PredisMutex;
+ 
+ $mutex = new PredisMutex();
+ 
+ ```
+By default, the configuration settings are taken from the `HLEB_MUTEX_TYPE_REDIS` or `HLEB_TYPE_DB` constant (database/dbase.config.php).
+
+
+
  
 -----------------------------------
 

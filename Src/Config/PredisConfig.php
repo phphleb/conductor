@@ -1,35 +1,32 @@
 <?php
 declare(strict_types=1);
-
 /**
- * Base class for configuring mutexes from the database (for the HLEB framework).
+ * Base class for configuring mutexes from the Redis(Predis) (for the HLEB framework).
  *
- * Базовый класс конфигурации мьютексов из БД (для фреймворка HLEB).
+ * Базовый класс конфигурации мьютексов из Redis(Predis)  (для фреймворка HLEB).
  */
 
 namespace Phphleb\Conductor\Src\Config;
 
 
 use Phphleb\Conductor\Src\Scheme\BaseConfigInterface;
-use Phphleb\Conductor\Src\Scheme\DbConfigInterface;
+use Phphleb\Conductor\Src\Scheme\PredisConfigInterface;
 
-class DbConfig implements DbConfigInterface, BaseConfigInterface
+class PredisConfig implements PredisConfigInterface, BaseConfigInterface
 {
     protected const MAX_LOCK_TIME = 14400;
 
-    protected const QUEUE_WAIT_INTERVAL = 100_000;
+    protected const QUEUE_WAIT_INTERVAL = 10_000;
 
-    protected const MUTEX_TABLE_NAME = 'mutex_auto_tags';
+    protected const MUTEX_PREFIX = 'mutex_auto_tags';
 
     protected const DATABASE_DEFAULT_CONFIG_PATH = HLEB_GLOBAL_DIRECTORY . '/database/default.dbase.config.php';
 
     protected const DATABASE_CONFIG_PATH = HLEB_GLOBAL_DIRECTORY . '/database/dbase.config.php';
 
-    protected array $config;
+    protected array $parameters;
 
-    protected string $userName;
-
-    protected string $password;
+    protected array $options;
 
     public function __construct()
     {
@@ -40,15 +37,16 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
             }
             require $path;
         }
-        $config = HLEB_PARAMETERS_FOR_DB[defined('HLEB_MUTEX_TYPE_DB') ? HLEB_MUTEX_TYPE_DB : HLEB_TYPE_DB];
+        $config = HLEB_PARAMETERS_FOR_DB[defined('HLEB_MUTEX_TYPE_REDIS') ? HLEB_MUTEX_TYPE_REDIS : HLEB_TYPE_DB];
 
-        $this->userName = $config["user"] ?? '';
-        $this->password = $config["pass"] ?? $config["password"] ?? '';
+        $this->parameters = $config;
 
-        $this->options = $config;
+        $this->options = $config['options'] ?? [];
 
-        if(!class_exists("\PDO")) {
-            throw new \Exception('PHP extension `ext-pdo` must be installed');
+        unset($config['options']);
+
+        if (!class_exists("\Predis\Client")) {
+            throw new \Exception('The library Predis must be installed (https://github.com/predis/predis)');
         }
     }
 
@@ -78,31 +76,19 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
         return self::QUEUE_WAIT_INTERVAL;
     }
 
-    /**
-     * Returns parameters for connection and other options.
-     *
-     * Возвращает параметры для соединения и других опций.
-     *
-     * @return array
-     */
-    public function getParams(): array
+    public function getMutexPrefix(): string
+    {
+        return self::MUTEX_PREFIX;
+    }
+
+    public function getParameters(): array
+    {
+        return $this->parameters;
+    }
+
+    public function getOptions(): array
     {
         return $this->options;
-    }
-
-    public function getMutexTableName(): string
-    {
-        return self::MUTEX_TABLE_NAME;
-    }
-
-    public function getUserName(): string
-    {
-        return $this->userName;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
     }
 }
 
