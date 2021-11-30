@@ -16,7 +16,8 @@
     "require": {
         "php": ">=7.4.0",
         "phphleb/updater": "*",
-        "ext-readline": "*"
+        "ext-readline": "*",
+        "ext-pdo": "*"
     },
     "autoload": {
         "psr-4": {
