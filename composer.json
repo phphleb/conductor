@@ -18,5 +18,10 @@
         "phphleb/updater": "*",
         "ext-readline": "*"
     },
+    "autoload": {
+        "psr-4": {
+            "Phphleb\\Conductor\\": "/"
+        }
+    },
     "minimum-stability": "dev"
 }
