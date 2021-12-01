@@ -92,7 +92,7 @@ class TagPredisManager
         try {
             $keys = $this->client->keys('*' . $this->config->getMutexPrefix() . '*');
             shuffle($keys);
-            $keys = array_slice($keys, 5);
+            $keys = array_slice($keys, 0, 5, true);
             foreach ($keys as $key) {
                 $tag = $this->stringToTagData($this->client->get($key));
                 if (empty($tag) || ($tag->getRevisionTime() < time() &&
