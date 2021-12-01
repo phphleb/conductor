@@ -74,7 +74,7 @@ class FileStorage extends BaseStorage implements StorageInterface
      */
     public function checkLockedTagExists(): bool
     {
-        $content = self::$tagManager->getFileContent($this->config->getStoragePath());
+        $content = self::$tagManager->getFileContent($this->getFilePath());
         if ($content) {
             $tag = self::$tagManager->stringToTagData($content);
             $hash = $tag->getHash();
@@ -90,7 +90,7 @@ class FileStorage extends BaseStorage implements StorageInterface
      */
     public function checkTagExists(): bool
     {
-        $content = self::$tagManager->getFileContent($this->config->getStoragePath());
+        $content = self::$tagManager->getFileContent($this->getFilePath());
         if ($content) {
             $tag = self::$tagManager->stringToTagData($content);
             $revisionTime = $tag->getRevisionTime();
