@@ -15,8 +15,6 @@ use Phphleb\Conductor\Src\Tags\Tag;
 
 class TagDbManager
 {
-    protected const DELIMITER = ':';
-
     protected DbConfigInterface $config;
 
     protected \PDO $pdo;
