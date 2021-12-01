@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Phphleb\Conductor\Src;
 
 use Phphleb\Conductor\Src\Scheme\{BaseConfigInterface, OriginMutexInterface, StorageInterface};
+use Exception;
 
 class OriginMutex implements OriginMutexInterface
 {
@@ -49,8 +50,9 @@ class OriginMutex implements OriginMutexInterface
      *   14400 - максимальное значение по умолчанию (из конфигурации).
      *
      * @return bool
-     * @throws MutexException
+     * @throws Exception
      */
+
     public function acquire(?int $unlockSeconds = null): bool
     {
         $this->unlockSeconds = $unlockSeconds >= 0 ?  (is_null($unlockSeconds) || $unlockSeconds > $this->config->getMaxLockTime() ? $this->config->getMaxLockTime() : $unlockSeconds) : 0;
