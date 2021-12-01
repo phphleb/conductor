@@ -115,7 +115,7 @@ class TagFileManager
         $files = glob($this->config->getStoragePath() . '/*' . $this->config->getFileExtension());
         if ($files) {
             shuffle($files);
-            $files = array_slice($files, 3);
+            $files = array_slice($files, 0, 3, true);
             foreach ($files as $file) {
                 $this->deleteExpiredFile($file);
             }
