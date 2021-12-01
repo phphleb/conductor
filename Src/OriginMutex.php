@@ -69,7 +69,7 @@ class OriginMutex implements OriginMutexInterface
             return true;
         }
 
-        $this->isReleased = $this->storage->lockTag($this->unlockSeconds, $this->revisionTime);
+        $this->isReleased = $this->storage->lockTag($this->unlockSeconds, $this->revisionTime) && $this->storage->checkLockedTagExists();
 
         return  $this->isReleased;
     }

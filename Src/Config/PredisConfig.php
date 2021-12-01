@@ -16,7 +16,7 @@ class PredisConfig implements PredisConfigInterface, BaseConfigInterface
 {
     protected const MAX_LOCK_TIME = 14400;
 
-    protected const QUEUE_WAIT_INTERVAL = 10_000;
+    protected const QUEUE_WAIT_INTERVAL = 100_000;
 
     protected const MUTEX_PREFIX = 'mutex_auto_tags';
 

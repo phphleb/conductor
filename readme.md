@@ -20,7 +20,9 @@ if ($mutex->acquire('mutex-name', 20)) { // Start blocking
    } else {
        throw new \Exception('Custom error text.');
    }
-$mutex->release('mutex-name'); // End of blocking
+if (!$mutex->release('mutex-name')) { // End of blocking
+   // Rolling back transactions
+}
 
 ```
 
