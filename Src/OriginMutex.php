@@ -14,6 +14,8 @@ use Exception;
 
 class OriginMutex implements OriginMutexInterface
 {
+    private const TIME_FACTOR = 2;
+
     protected StorageInterface $storage;
 
     protected BaseConfigInterface $config;
@@ -25,6 +27,8 @@ class OriginMutex implements OriginMutexInterface
     protected int $revisionTime = 0;
 
     protected int $unlockSeconds = 0;
+
+    protected float $startInterval = 0;
 
     public function __construct(StorageInterface $storage)
     {
@@ -74,7 +78,7 @@ class OriginMutex implements OriginMutexInterface
         $this->isReleased = $this->storage->lockTag($this->unlockSeconds, $this->revisionTime);
 
         if ($this->isReleased) {
-            usleep($this->config->getQueueWaitIntervalInUs());
+            $this->pause();
             $this->isReleased = $this->storage->checkLockedTagExists();
         }
 
@@ -184,6 +188,7 @@ class OriginMutex implements OriginMutexInterface
      */
     protected function wait(): bool
     {
+        $this->startInterval = microtime(true);
         try {
             if ($this->storage->checkTagExists()) {
                 usleep($this->config->getQueueWaitIntervalInUs());
@@ -208,6 +213,20 @@ class OriginMutex implements OriginMutexInterface
             return $this->status = false;
         }
         return $this->storage->unlockTag();
+    }
+
+    /**
+     * Returns the wait result, in microseconds, which is equal to the interval between two actions.
+     *
+     * Возвращает результат ожидания в микросекундах, который равен интервалу между двумя действиями.
+     *
+     * @return int
+     */
+    protected function pause(): int
+    {
+        $us = (int)((microtime(true) - $this->startInterval) * 1_000_000 * self::TIME_FACTOR);
+        usleep($us);
+        return $us;
     }
 }
 

@@ -17,7 +17,7 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
 {
     protected const MAX_LOCK_TIME = 14400;
 
-    protected const QUEUE_WAIT_INTERVAL = 100_000;
+    protected const QUEUE_WAIT_INTERVAL = 300_000;
 
     protected const MUTEX_TABLE_NAME = 'mutex_auto_tags';
 
