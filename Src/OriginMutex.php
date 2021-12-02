@@ -64,25 +64,11 @@ class OriginMutex implements OriginMutexInterface
         if (!is_null($this->status)) {
             throw new Exception('The method `acquire` has already been called.');
         }
-
-        if(!$this->wait()) {
-            return false;
-        }
-
-        $this->revisionTime = time() + $this->unlockSeconds;
-
         if ($this->unlockSeconds === 0) {
             return true;
         }
 
-        $this->isReleased = $this->storage->lockTag($this->unlockSeconds, $this->revisionTime);
-
-        if ($this->isReleased) {
-            $this->pause();
-            $this->isReleased = $this->storage->checkLockedTagExists();
-        }
-
-        return  $this->isReleased;
+        return  $this->isReleased = $this->waitAndLock();
     }
 
     /**
@@ -227,6 +213,30 @@ class OriginMutex implements OriginMutexInterface
         $us = (int)((microtime(true) - $this->startInterval) * 1_000_000 * self::TIME_FACTOR);
         usleep($us);
         return $us;
+    }
+
+    /**
+     * Returns the result of locking the mutex after waiting in the queue.
+     *
+     * Возвращает результат блокировки мьютекса после ожидания в очереди.
+     *
+     * @return bool
+     */
+    private function waitAndLock(): bool
+    {
+        if (!$this->wait()) {
+            return false;
+        }
+        $this->revisionTime = time() + $this->unlockSeconds;
+        $result = $this->storage->lockTag($this->unlockSeconds, $this->revisionTime);
+        if ($result) {
+            $this->pause();
+            $result = $this->storage->checkLockedTagExists();
+            if (!$result) {
+                $result = $this->waitAndLock();
+            }
+        }
+        return $result;
     }
 }
 
