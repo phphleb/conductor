@@ -91,12 +91,14 @@ class TagDbManager
     public function saveTag(string $tagId, Tag $tag): bool
     {
         if ($this->deleteTag($tagId)) {
-            return (bool)$this->pdo
+            $this->pdo
                 ->prepare(
                     "INSERT INTO {$this->config->getMutexTableName()} (tag, title, hash, unlock_seconds, revision_time, date_create) VALUES (?,?,?,?,?,NOW())"
                 )->execute([
                     $tagId, $tag->getName(), $tag->getHash(), $tag->getUnlockSeconds(), $tag->getRevisionTime(),
                 ]);
+
+            return true;
         }
         return false;
     }
