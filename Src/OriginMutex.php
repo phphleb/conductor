@@ -174,16 +174,18 @@ class OriginMutex implements OriginMutexInterface
      */
     protected function wait(): bool
     {
-        $this->startInterval = microtime(true);
-        try {
-            if ($this->storage->checkTagExists()) {
-                usleep($this->config->getQueueWaitIntervalInUs());
-                $this->wait();
+        while (true) {
+            $this->startInterval = microtime(true);
+            try {
+                if (!$this->storage->checkTagExists()) {
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                return false;
             }
-        } catch (\Throwable $e) {
-            return false;
+            usleep($this->config->getQueueWaitIntervalInUs());
         }
-        return true;
+        return false;
     }
 
     /**
@@ -224,19 +226,20 @@ class OriginMutex implements OriginMutexInterface
      */
     private function waitAndLock(): bool
     {
-        if (!$this->wait()) {
-            return false;
-        }
-        $this->revisionTime = time() + $this->unlockSeconds;
-        $result = $this->storage->lockTag($this->unlockSeconds, $this->revisionTime);
-        if ($result) {
+        while (true) {
+            if (!$this->wait()) {
+                return false;
+            }
+            $this->revisionTime = time() + $this->unlockSeconds;
+            if (!$this->storage->lockTag($this->unlockSeconds, $this->revisionTime)) {
+                return false;
+            }
             $this->pause();
-            $result = $this->storage->checkLockedTagExists();
-            if (!$result) {
-                $result = $this->waitAndLock();
+            if ($this->storage->checkLockedTagExists()) {
+                return true;
             }
         }
-        return $result;
+        return false;
     }
 }
 
