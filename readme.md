@@ -32,11 +32,11 @@ When setting the time period for locking (the second argument `acquire` in secon
 #### Installation in a project based on the framework HLEB
 
  ```bash
- $ composer require phphleb/mutex
+ $ composer require phphleb/conductor
 ```
 Create a console commands `php console mutex/mutex-db-stat-task`, `php console mutex/mutex-predis-stat-task` and `php console mutex/mutex-file-stat-task` to get statistics on active mutexes:
  ```bash
- $ php console phphleb/mutex --add
+ $ php console phphleb/conductor --add
 
  $ composer dump-autoload
  ```
@@ -44,7 +44,7 @@ Create a console commands `php console mutex/mutex-db-stat-task`, `php console m
 
 Using Composer (or copy the files into the **vendor** folder of the project):
  ```bash
- $ composer require phphleb/mutex
+ $ composer require phphleb/conductor
 ```
 
 Own configuration (to be installed once):
