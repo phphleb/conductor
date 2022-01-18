@@ -193,9 +193,6 @@ class TagDbManager
 
     public function checkAndcreateTable(): bool
     {
-        try {
-            $this->pdo->query("SELECT tag FROM {$this->config->getMutexTableName()} LIMIT 1");
-        } catch (\Throwable $e) {
             return (bool)$this->pdo->exec( "
             CREATE TABLE IF NOT EXISTS {$this->config->getMutexTableName()} (
                 tag VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -205,9 +202,6 @@ class TagDbManager
                 revision_time INT(11) NOT NULL,
                 date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
-        }
-        return true;
-
     }
 
     private function sortArrayFromData(array $data): array
