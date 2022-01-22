@@ -25,7 +25,7 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
 
     protected const DATABASE_CONFIG_PATH = HLEB_GLOBAL_DIRECTORY . '/database/dbase.config.php';
 
-    protected array $config;
+    protected array $options;
 
     protected string $userName;
 

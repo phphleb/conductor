@@ -73,6 +73,7 @@ use \Phphleb\Conductor\DbMutex;
 $mutex = new DbMutex();
 
 ```
+Supported  __MySql__ / __MariaDB__ / __PostgreSQL__.
 
  ### PredisMutex
  

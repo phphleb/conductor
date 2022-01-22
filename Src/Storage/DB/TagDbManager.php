@@ -15,7 +15,15 @@ use Phphleb\Conductor\Src\Tags\Tag;
 
 class TagDbManager
 {
+    const TYPE_MYSQL = 'mysql:';
+
+    const TYPE_POSTGRESS = 'pgsql:';
+
+    const ALL_TYPES = [self::TYPE_MYSQL, self::TYPE_POSTGRESS];
+
     protected DbConfigInterface $config;
+
+    protected ?string $dbType;
 
     protected \PDO $pdo;
 
@@ -23,17 +31,16 @@ class TagDbManager
     {
         $this->config = $config;
         $this->pdo = $this->createConnection();
+        $this->dbType = $this->selectDbType();
     }
 
     protected function createConnection(): \PDO
     {
         $params = $this->config->getParams();
-        $opt = array_merge([
-            \PDO::ATTR_ERRMODE => $params["errmode"] ?? \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => $params["default-mode"] ?? \PDO::FETCH_ASSOC,
-            \PDO::ATTR_EMULATE_PREPARES => $params["emulate-prepares"] ?? false
-        ], $params["options-list"] ?? []);
-
+        $opt = $params["options-list"] ?? [];
+        $opt[\PDO::ATTR_ERRMODE] = \PDO::ERRMODE_EXCEPTION;
+        $opt[\PDO::ATTR_DEFAULT_FETCH_MODE] = $params["default-mode"] ?? \PDO::FETCH_ASSOC;
+        $opt[\PDO::ATTR_EMULATE_PREPARES] = $params["emulate-prepares"] ?? false;
         $user = $this->config->getUserName();
         $pass = $this->config->getPassword();
         $condition = [];
@@ -97,7 +104,6 @@ class TagDbManager
                 )->execute([
                     $tagId, $tag->getName(), $tag->getHash(), $tag->getUnlockSeconds(), $tag->getRevisionTime(),
                 ]);
-
             return true;
         }
         return false;
@@ -134,7 +140,7 @@ class TagDbManager
     public function deleteTag(string $tagId): bool
     {
         try {
-            $this->pdo->exec("DELETE FROM {$this->config->getMutexTableName()} WHERE tag = '{$tagId}' LIMIT 1 ");
+            $this->pdo->exec("DELETE FROM {$this->config->getMutexTableName()} WHERE tag = '{$tagId}'");
         } catch (\Throwable $e) {
             return false;
         }
@@ -144,7 +150,7 @@ class TagDbManager
     public function deleteLockedTag(string $tagId, string $hash): bool
     {
         try {
-            $this->pdo->exec("DELETE FROM {$this->config->getMutexTableName()} WHERE tag = '{$tagId}' AND hash = '{$hash}' LIMIT 1 ");
+            $this->pdo->exec("DELETE FROM {$this->config->getMutexTableName()} WHERE tag = '{$tagId}' AND hash = '{$hash}'");
         } catch (\Throwable $e) {
             return false;
         }
@@ -154,7 +160,7 @@ class TagDbManager
     public function deleteExpiredTags(): void
     {
         try {
-            $this->pdo->exec("DELETE FROM {$this->config->getMutexTableName()} WHERE revision_time < '" . (time() - $this->config->getMaxLockTime()) . "' LIMIT 5 ");
+            $this->pdo->exec("DELETE FROM {$this->config->getMutexTableName()} WHERE revision_time < '" . (time() - $this->config->getMaxLockTime()) . "'");
         } catch (\Throwable $e) {
 
             // If the table is not created.
@@ -193,15 +199,37 @@ class TagDbManager
 
     public function checkAndcreateTable(): bool
     {
-            return (bool)$this->pdo->exec( "
-            CREATE TABLE IF NOT EXISTS {$this->config->getMutexTableName()} (
-                tag VARCHAR(50) NOT NULL PRIMARY KEY,
-                title VARCHAR(250) NOT NULL UNIQUE KEY,
-                hash VARCHAR(30) NOT NULL,
-                unlock_seconds INT(6) NOT NULL,
-                revision_time INT(11) NOT NULL,
-                date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        if ($this->dbType === self::TYPE_MYSQL) {
+            if (!(bool)$this->pdo->query("SHOW TABLES LIKE'{$this->config->getMutexTableName()}'")->fetch()) {
+                return (bool)$this->pdo->exec("
+                CREATE TABLE IF NOT EXISTS {$this->config->getMutexTableName()} (
+                    tag VARCHAR(50) NOT NULL PRIMARY KEY,
+                    title VARCHAR(250) NOT NULL UNIQUE KEY,
+                    hash VARCHAR(30) NOT NULL,
+                    unlock_seconds INT(6) NOT NULL,
+                    revision_time INT(11) NOT NULL,
+                    date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
+            }
+        } else if ($this->dbType === self::TYPE_POSTGRESS) {
+            try {
+                $this->pdo->query("SELECT 1 FROM '{$this->config->getMutexTableName()}'")->fetch();
+            } catch (\Throwable $e) {
+                return (bool)$this->pdo->exec("
+                CREATE TABLE IF NOT EXISTS {$this->config->getMutexTableName()} (
+                    tag VARCHAR(50) NOT NULL,
+                    title VARCHAR(250) NOT NULL,
+                    hash VARCHAR(30) NOT NULL,
+                    unlock_seconds INTEGER NOT NULL,
+                    revision_time INTEGER NOT NULL,
+                    date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (tag),
+                    UNIQUE (title)
+        )");
+
+            }
+        }
+        return false;
     }
 
     private function sortArrayFromData(array $data): array
@@ -212,6 +240,22 @@ class TagDbManager
             (string)$data['hash'],
             (string)$data['title']
         ];
+    }
+
+
+    private function selectDbType(): ?string
+    {
+        $configParams = $this->config->getParams();
+        foreach ($this->config->getParams() as $key => $param) {
+            if (gettype($key) === 'integer') {
+                foreach (self::ALL_TYPES as $type) {
+                    if (strripos($param, $type) !== false) {
+                        return $type;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }
