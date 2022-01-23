@@ -15,12 +15,6 @@ use Phphleb\Conductor\Src\Tags\Tag;
 
 class TagDbManager
 {
-    const TYPE_MYSQL = 'mysql:';
-
-    const TYPE_POSTGRESS = 'pgsql:';
-
-    const ALL_TYPES = [self::TYPE_MYSQL, self::TYPE_POSTGRESS];
-
     protected DbConfigInterface $config;
 
     protected ?string $dbType;
@@ -199,19 +193,7 @@ class TagDbManager
 
     public function checkAndcreateTable(): bool
     {
-        if ($this->dbType === self::TYPE_MYSQL) {
-            if (!(bool)$this->pdo->query("SHOW TABLES LIKE'{$this->config->getMutexTableName()}'")->fetch()) {
-                return (bool)$this->pdo->exec("
-                CREATE TABLE IF NOT EXISTS {$this->config->getMutexTableName()} (
-                    tag VARCHAR(50) NOT NULL PRIMARY KEY,
-                    title VARCHAR(250) NOT NULL UNIQUE KEY,
-                    hash VARCHAR(30) NOT NULL,
-                    unlock_seconds INT(6) NOT NULL,
-                    revision_time INT(11) NOT NULL,
-                    date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )");
-            }
-        } else if ($this->dbType === self::TYPE_POSTGRESS) {
+        if ($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
             try {
                 $this->pdo->query("SELECT 1 FROM '{$this->config->getMutexTableName()}'")->fetch();
             } catch (\Throwable $e) {
@@ -228,7 +210,20 @@ class TagDbManager
         )");
 
             }
+        } else {
+            if (!(bool)$this->pdo->query("SHOW TABLES LIKE'{$this->config->getMutexTableName()}'")->fetch()) {
+                return (bool)$this->pdo->exec("
+                CREATE TABLE IF NOT EXISTS {$this->config->getMutexTableName()} (
+                    tag VARCHAR(50) NOT NULL PRIMARY KEY,
+                    title VARCHAR(250) NOT NULL UNIQUE KEY,
+                    hash VARCHAR(30) NOT NULL,
+                    unlock_seconds INT(6) NOT NULL,
+                    revision_time INT(11) NOT NULL,
+                    date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+            }
         }
+
         return false;
     }
 
@@ -240,22 +235,6 @@ class TagDbManager
             (string)$data['hash'],
             (string)$data['title']
         ];
-    }
-
-
-    private function selectDbType(): ?string
-    {
-        $configParams = $this->config->getParams();
-        foreach ($this->config->getParams() as $key => $param) {
-            if (gettype($key) === 'integer') {
-                foreach (self::ALL_TYPES as $type) {
-                    if (strripos($param, $type) !== false) {
-                        return $type;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
 }
