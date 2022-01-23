@@ -17,15 +17,12 @@ class TagDbManager
 {
     protected DbConfigInterface $config;
 
-    protected ?string $dbType;
-
     protected \PDO $pdo;
 
     public function __construct(DbConfigInterface $config)
     {
         $this->config = $config;
         $this->pdo = $this->createConnection();
-        $this->dbType = $this->selectDbType();
     }
 
     protected function createConnection(): \PDO
