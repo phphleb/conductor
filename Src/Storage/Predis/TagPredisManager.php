@@ -11,6 +11,7 @@ namespace Phphleb\Conductor\Src\Storage\Predis;
 
 use Phphleb\Conductor\Src\Scheme\PredisConfigInterface;
 use Phphleb\Conductor\Src\Tags\Tag;
+use Phphleb\Hredis\HRedis;
 use Predis\Client as PredisClient;
 
 class TagPredisManager
@@ -160,7 +161,7 @@ class TagPredisManager
 
     protected function createConnection(): PredisClient
     {
-        return new PredisClient($this->config->getParameters(), $this->config->getOptions());
+        return (new HRedis($this->config->getParameters(), $this->config->getOptions()))->client();
     }
 
     private function sortStringFromData(string $data): array

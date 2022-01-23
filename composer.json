@@ -17,7 +17,8 @@
         "php": ">=7.4.0",
         "phphleb/updater": "*",
         "ext-readline": "*",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "phphleb/predis": "dev-master"
     },
     "autoload": {
         "psr-4": {

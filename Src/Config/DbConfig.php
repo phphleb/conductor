@@ -21,10 +21,6 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
 
     protected const MUTEX_TABLE_NAME = 'mutex_auto_tags';
 
-    protected const DATABASE_DEFAULT_CONFIG_PATH = HLEB_GLOBAL_DIRECTORY . '/database/default.dbase.config.php';
-
-    protected const DATABASE_CONFIG_PATH = HLEB_GLOBAL_DIRECTORY . '/database/dbase.config.php';
-
     protected array $options;
 
     protected string $userName;
@@ -34,9 +30,13 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
     public function __construct()
     {
         if (!defined('HLEB_PARAMETERS_FOR_DB')) {
-            $path = self::DATABASE_CONFIG_PATH;
+            $configDir = defined('HLEB_SEARCH_DBASE_CONFIG_FILE') ?
+                HLEB_SEARCH_DBASE_CONFIG_FILE :
+                HLEB_GLOBAL_DIRECTORY . '/database';
+
+            $path = $configDir . '/dbase.config.php';
             if (!file_exists($path)) {
-                $path = self::DATABASE_DEFAULT_CONFIG_PATH;
+                $path = $configDir . '/default.dbase.config.php';
             }
             require $path;
         }

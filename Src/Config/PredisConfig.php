@@ -20,35 +20,9 @@ class PredisConfig implements PredisConfigInterface, BaseConfigInterface
 
     protected const MUTEX_PREFIX = 'mutex_auto_tags';
 
-    protected const DATABASE_DEFAULT_CONFIG_PATH = HLEB_GLOBAL_DIRECTORY . '/database/default.dbase.config.php';
+    protected array $parameters = [];
 
-    protected const DATABASE_CONFIG_PATH = HLEB_GLOBAL_DIRECTORY . '/database/dbase.config.php';
-
-    protected array $parameters;
-
-    protected array $options;
-
-    public function __construct()
-    {
-        if (!defined('HLEB_PARAMETERS_FOR_DB')) {
-            $path = self::DATABASE_CONFIG_PATH;
-            if (!file_exists($path)) {
-                $path = self::DATABASE_DEFAULT_CONFIG_PATH;
-            }
-            require $path;
-        }
-        $config = HLEB_PARAMETERS_FOR_DB[defined('HLEB_TYPE_REDIS') ? HLEB_TYPE_REDIS : (defined('HLEB_MUTEX_TYPE_REDIS') ? HLEB_MUTEX_TYPE_REDIS : HLEB_TYPE_DB)];
-
-        $this->parameters = $config;
-
-        $this->options = $config['options'] ?? [];
-
-        unset($config['options']);
-
-        if (!class_exists("\Predis\Client")) {
-            throw new \Exception('The library Predis must be installed (https://github.com/predis/predis)');
-        }
-    }
+    protected array $options = [];
 
     /**
      * Returns the maximum number of seconds that a lock can be held.
