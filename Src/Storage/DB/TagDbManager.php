@@ -30,7 +30,7 @@ class TagDbManager
         $params = $this->config->getParams();
         $opt = $params["options-list"] ?? [];
         $opt[\PDO::ATTR_ERRMODE] = \PDO::ERRMODE_EXCEPTION;
-        $opt[\PDO::ATTR_DEFAULT_FETCH_MODE] = $params["default-mode"] ?? \PDO::FETCH_ASSOC;
+        $opt[\PDO::ATTR_DEFAULT_FETCH_MODE] = \PDO::FETCH_ASSOC;
         $opt[\PDO::ATTR_EMULATE_PREPARES] = $params["emulate-prepares"] ?? false;
         $user = $this->config->getUserName();
         $pass = $this->config->getPassword();
