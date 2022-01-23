@@ -18,7 +18,7 @@
         "phphleb/updater": "*",
         "ext-readline": "*",
         "ext-pdo": "*",
-        "phphleb/predis": "dev-master"
+        "phphleb/hredis": "dev-master"
     },
     "autoload": {
         "psr-4": {
