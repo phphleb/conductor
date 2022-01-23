@@ -91,7 +91,7 @@ Supported  __MySQL__ / __MariaDB__ / __PostgreSQL__.
  
  ```
 
-By default, the configuration settings are taken from the `HLEB_MUTEX_TYPE_REDIS` or `HLEB_TYPE_DB` constant (database/dbase.config.php).
+By default, the configuration settings are taken from the `HLEB_TYPE_REDIS` or default `HLEB_TYPE_DB` constant (database/dbase.config.php).
 
 
 

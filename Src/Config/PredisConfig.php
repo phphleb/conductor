@@ -37,7 +37,7 @@ class PredisConfig implements PredisConfigInterface, BaseConfigInterface
             }
             require $path;
         }
-        $config = HLEB_PARAMETERS_FOR_DB[defined('HLEB_MUTEX_TYPE_REDIS') ? HLEB_MUTEX_TYPE_REDIS : HLEB_TYPE_DB];
+        $config = HLEB_PARAMETERS_FOR_DB[defined('HLEB_TYPE_REDIS') ? HLEB_TYPE_REDIS : (defined('HLEB_MUTEX_TYPE_REDIS') ? HLEB_MUTEX_TYPE_REDIS : HLEB_TYPE_DB)];
 
         $this->parameters = $config;
 
