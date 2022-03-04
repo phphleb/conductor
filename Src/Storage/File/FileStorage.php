@@ -10,7 +10,9 @@ declare(strict_types=1);
 namespace Phphleb\Conductor\Src\Storage\File;
 
 use Phphleb\Conductor\Src\Scheme\{BaseConfigInterface, FileConfigInterface, StorageInterface};
+use Exception;
 use Phphleb\Conductor\Src\Storage\BaseStorage;
+use Throwable;
 
 class FileStorage extends BaseStorage implements StorageInterface
 {

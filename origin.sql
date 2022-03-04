@@ -1,7 +1,7 @@
 
 /* MySQL/MariaDB   */
 CREATE TABLE IF NOT EXISTS mutex_auto_tags (
-    tag VARCHAR(50) NOT NULL PRIMARY KEY,
+    tag VARCHAR(50) NOT NULL PRIMARY KEY, /* Limited quantity */
     title VARCHAR(250) NOT NULL UNIQUE KEY,
     hash VARCHAR(30) NOT NULL,
     unlock_seconds INT(6) NOT NULL,
@@ -17,6 +17,6 @@ CREATE TABLE IF NOT EXISTS mutex_auto_tags (
     unlock_seconds INTEGER NOT NULL,
     revision_time INTEGER NOT NULL,
     date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (tag),
+    PRIMARY KEY (tag), /* Limited quantity */
     UNIQUE (title)
 );

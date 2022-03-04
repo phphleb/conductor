@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Phphleb\Conductor\Src\Storage\File;
 
 use Phphleb\Conductor\Src\Scheme\FileConfigInterface;
-use Phphleb\Conductor\Src\Config\{FileConfig};
 use Phphleb\Conductor\Src\Tags\Tag;
 
 class TagFileManager

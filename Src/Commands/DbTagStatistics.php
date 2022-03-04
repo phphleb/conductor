@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Phphleb\Conductor\Src\Commands;
 
 
+use Exception;
 use Phphleb\Conductor\Src\Config\DbConfig;
 use Phphleb\Conductor\Src\Scheme\DbConfigInterface;
 use Phphleb\Conductor\Src\Storage\DB\TagDbManager;
@@ -29,6 +30,7 @@ class DbTagStatistics
      * @param string $name - custom mutex name.
      *                     - пользовательское название мьютекса.
      * @return string|null
+     * @throws Exception
      */
     public function execute(string $name = ''): ?string
     {
@@ -53,8 +55,6 @@ class DbTagStatistics
                 return 'No active mutexes found.' . PHP_EOL;
             }
         }
-
-        return null;
     }
 
 }

@@ -53,8 +53,6 @@ class PredisTagStatistics
                 return 'No active mutexes found.' . PHP_EOL;
             }
         }
-
-        return null;
     }
 
 }
