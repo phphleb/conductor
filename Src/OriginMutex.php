@@ -203,7 +203,7 @@ class OriginMutex implements OriginMutexInterface
             return $this->status = false;
         }
 
-        return !$this->isIntercepted() && $this->storage->unlockTag();
+        return $this->storage->checkLockedTagExists() && $this->storage->unlockTag();
     }
 
     /**
