@@ -1,7 +1,9 @@
 <?php
+/**
+ * External mutex interface.
+ */
 
 namespace Phphleb\Conductor\Src\Scheme;
-
 
 interface MutexInterface
 {

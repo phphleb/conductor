@@ -16,6 +16,8 @@ class OriginMutex implements OriginMutexInterface
 {
     private const TIME_FACTOR = 2;
 
+    private const MIN_PAUSE = 1_000;
+
     protected StorageInterface $storage;
 
     protected BaseConfigInterface $config;
@@ -200,7 +202,8 @@ class OriginMutex implements OriginMutexInterface
         if (!$this->isReleased) {
             return $this->status = false;
         }
-        return $this->storage->unlockTag();
+
+        return !$this->isIntercepted() && $this->storage->unlockTag();
     }
 
     /**
@@ -213,6 +216,9 @@ class OriginMutex implements OriginMutexInterface
     protected function pause(): int
     {
         $us = (int)((microtime(true) - $this->startInterval) * 1_000_000 * self::TIME_FACTOR);
+        if ($us < self::MIN_PAUSE) {
+            $us = self::MIN_PAUSE;
+        }
         usleep($us);
         return $us;
     }
