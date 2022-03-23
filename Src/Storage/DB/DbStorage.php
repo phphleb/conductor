@@ -102,7 +102,7 @@ class DbStorage extends BaseStorage implements StorageInterface
     
     protected function prepareDbResources(): void
     {
-        if (!self::$tagManager->checkAndcreateTable()) {
+        if (!self::$tagManager->checkAndCreateTable()) {
             if (rand(0, 5) === 1) {
                 self::$tagManager->deleteExpiredTags();
             }

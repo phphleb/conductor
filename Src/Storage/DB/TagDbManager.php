@@ -188,7 +188,7 @@ class TagDbManager
         return $tags;
     }
 
-    public function checkAndcreateTable(): bool
+    public function checkAndCreateTable(): bool
     {
         if ($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
             try {
