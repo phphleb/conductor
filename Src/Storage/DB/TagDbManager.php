@@ -217,7 +217,7 @@ class TagDbManager
                     unlock_seconds INT(6) NOT NULL,
                     revision_time INT(11) NOT NULL,
                     date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )");
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
             }
         }
 
