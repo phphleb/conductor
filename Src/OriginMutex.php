@@ -16,7 +16,7 @@ class OriginMutex implements OriginMutexInterface
 {
     private const TIME_FACTOR = 2;
 
-    private const MIN_PAUSE = 1_000;
+    private const MIN_PAUSE = 10;
 
     protected StorageInterface $storage;
 
