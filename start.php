@@ -34,7 +34,7 @@
         if ($actionType === "R") {
             return false;
         }
-        selectAction();
+        return selectAction();
     }
 
 
