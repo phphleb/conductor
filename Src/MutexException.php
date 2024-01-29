@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Class for individual errors of the mutex system.
  *
@@ -9,7 +7,6 @@ declare(strict_types=1);
 
 namespace Phphleb\Conductor\Src;
 
-
 class MutexException extends \Exception
 {
     public function __construct(string $mutexName, string $message, $code = 0, \Throwable $previous = null)
@@ -17,7 +14,8 @@ class MutexException extends \Exception
         parent::__construct("[Mutex name: $mutexName] $message", $code, $previous);
     }
 
-    public function __toString()
+    #[\Override]
+    public function __toString(): string
     {
         return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
     }

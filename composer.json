@@ -1,10 +1,11 @@
 {
     "name": "phphleb/conductor",
-    "description": "Mutexes for Micro-Framework HLEB",
+    "description": "Mutexes for PHP Framework HLEB2",
     "type": "library",
     "keywords": [
         "mutex",
-        "php"
+        "php",
+        "hleb2"
     ],
     "license": "MIT",
     "authors": [
@@ -14,7 +15,7 @@
         }
     ],
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=8.2.0",
         "phphleb/updater": "*",
         "ext-readline": "*",
         "ext-pdo": "*",

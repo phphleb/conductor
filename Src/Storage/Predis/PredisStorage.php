@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 /**
  * Predis-based mutex store request handler.
  *
@@ -21,7 +20,7 @@ class PredisStorage extends BaseStorage implements StorageInterface
 
     protected PredisConfigInterface $config;
 
-    protected static ?TagPredisManager $tagManager = null;
+    protected ?TagPredisManager $tagManager = null;
 
     protected int $unlockSeconds = 0;
 
@@ -34,16 +33,17 @@ class PredisStorage extends BaseStorage implements StorageInterface
         $this->mutexName = $mutexName;
         $this->mutexId = $this->generateIdFromName($mutexName);
         $this->config = $config;
-        $this->processHash = microtime(true) . '-' . rand();
+        $this->processHash = \microtime(true) . '-' . \rand();
 
-        if (is_null(self::$tagManager)) {
-            self::$tagManager = new TagPredisManager($config);
+        if ($this->tagManager === null) {
+            $this->tagManager = new TagPredisManager($config);
         }
     }
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function getConfig(): BaseConfigInterface
     {
         return $this->config;
@@ -52,6 +52,7 @@ class PredisStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function lockTag(int $unlockSeconds, int $revisionTime): bool
     {
         $this->unlockSeconds = $unlockSeconds;
@@ -66,11 +67,12 @@ class PredisStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function checkTagExists(): bool
     {
-        $revisionTime = self::$tagManager->getTagRevisionTime($this->mutexId);
+        $revisionTime = $this->tagManager->getTagRevisionTime($this->mutexId);
         if ($revisionTime) {
-            return $revisionTime >= time();
+            return $revisionTime >= \time();
         }
         return false;
     }
@@ -78,17 +80,19 @@ class PredisStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function checkLockedTagExists(): bool
     {
-        return self::$tagManager->getLockTagExists($this->mutexId, $this->processHash);
+        return $this->tagManager->getLockTagExists($this->mutexId, $this->processHash);
     }
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function unlockTag(): bool
     {
-        return self::$tagManager->deleteLockedTag($this->mutexId, $this->processHash);
+        return $this->tagManager->deleteLockedTag($this->mutexId, $this->processHash);
     }
 
     /**
@@ -96,21 +100,21 @@ class PredisStorage extends BaseStorage implements StorageInterface
      */
     protected function generateIdFromName(string $name): string
     {
-        return sha1($name);
+        return \sha1($name);
     }
 
     protected function preparePredisResources(): void
     {
-        if (rand(0, 20) === 1) {
-            self::$tagManager->deleteExpiredTags();
+        if (\rand(0, 20) === 1) {
+            $this->tagManager->deleteExpiredTags();
         }
     }
 
     protected function createTag(): bool
     {
-        return self::$tagManager->saveTag(
+        return $this->tagManager->saveTag(
             $this->mutexId,
-            self::$tagManager->valuesToTagData(
+            $this->tagManager->valuesToTagData(
                 $this->revisionTime,
                 $this->unlockSeconds,
                 $this->processHash,

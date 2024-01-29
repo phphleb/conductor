@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Template class for declaring methods for working with mutexes.
  *
@@ -30,14 +28,12 @@ abstract class BaseStorage
      *
      * Возвращает результат блокировки текущего мьютекса.
      *
-     * @param int|null $unlockSeconds - sets the maximum blocking time in seconds.
+     * @param int$unlockSeconds - sets the maximum blocking time in seconds.
+     *                          - устанавливает максимальное время блокировки в секундах.
      *
-     *                                - устанавливает максимальное время блокировки в секундах.
      *
-     *
-     * @param int $revisionTime       - sets the end time of the mutex lock.
-     *
-     *                                - устанавливает время окончания блокировки мьютекса.
+     * @param int $revisionTime - sets the end time of the mutex lock.
+     *                          - устанавливает время окончания блокировки мьютекса.
      *
      * @return bool
      */

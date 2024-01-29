@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Class for manipulating mutex tags from the database.
  *
@@ -36,11 +34,11 @@ class TagDbManager
         $pass = $this->config->getPassword();
         $condition = [];
         foreach ($params as $key => $param) {
-            if (is_numeric($key)) {
-                $condition [] = preg_replace('/\s+/', '', $param);
+            if (\is_numeric($key)) {
+                $condition [] = \preg_replace('/\s+/', '', $param);
             }
         }
-        $connection = implode(";", $condition);
+        $connection = \implode(";", $condition);
 
         return $this->pdo = new \PDO($connection, $user, $pass, $opt);
     }

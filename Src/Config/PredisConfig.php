@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 /**
  * Base class for configuring mutexes from the Redis(Predis) (for the HLEB framework).
  *
@@ -31,6 +30,7 @@ class PredisConfig implements PredisConfigInterface, BaseConfigInterface
      *
      * @return int
      */
+    #[\Override]
     public function getMaxLockTime(): int
     {
         return self::MAX_LOCK_TIME;
@@ -45,21 +45,25 @@ class PredisConfig implements PredisConfigInterface, BaseConfigInterface
      *
      * @return int
      */
+    #[\Override]
     public function getQueueWaitIntervalInUs(): int
     {
         return self::QUEUE_WAIT_INTERVAL;
     }
 
+    #[\Override]
     public function getMutexPrefix(): string
     {
         return self::MUTEX_PREFIX;
     }
 
+    #[\Override]
     public function getParameters(): array
     {
         return $this->parameters;
     }
 
+    #[\Override]
     public function getOptions(): array
     {
         return $this->options;

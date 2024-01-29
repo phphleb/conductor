@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 /**
  * A class for manipulating mutex tags from Redis(Predis).
  *
@@ -75,7 +74,7 @@ class TagPredisManager
     public function saveTag(string $tagId, Tag $tag): bool
     {
         try {
-            $data = implode(self::DELIMITER, [$tagId, $tag->getRevisionTime(), $tag->getUnlockSeconds(), $tag->getHash(), $tag->getName()]);
+            $data = \implode(self::DELIMITER, [$tagId, $tag->getRevisionTime(), $tag->getUnlockSeconds(), $tag->getHash(), $tag->getName()]);
             $this->client->set($this->createKey($tagId), $data);
         } catch (\Throwable $e) {
             return false;
@@ -92,12 +91,12 @@ class TagPredisManager
     {
         try {
             $keys = $this->client->keys('*' . $this->config->getMutexPrefix() . '*');
-            shuffle($keys);
-            $keys = array_slice($keys, 0, 5, true);
+            \shuffle($keys);
+            $keys = \array_slice($keys, 0, 5, true);
             foreach ($keys as $key) {
                 $tag = $this->stringToTagData($this->client->get($key));
-                if (empty($tag) || ($tag->getRevisionTime() < time() &&
-                        $tag->getRevisionTime() - $tag->getUnlockSeconds() < time() - $this->config->getMaxLockTime())) {
+                if (empty($tag) || ($tag->getRevisionTime() < \time() &&
+                        $tag->getRevisionTime() - $tag->getUnlockSeconds() < \time() - $this->config->getMaxLockTime())) {
                     $this->client->del($key);
                 }
             }
@@ -161,17 +160,20 @@ class TagPredisManager
 
     protected function createConnection(): PredisClient
     {
+        if (!\class_exists('Phphleb\Hredis\HRedis')) {
+            throw new \ErrorException('The phphleb/hredis library required for mutexes to work was not found.');
+        }
         return (new HRedis($this->config->getParameters(), $this->config->getOptions()))->client();
     }
 
     private function sortStringFromData(string $data): array
     {
-        $list = explode(self::DELIMITER, $data);
-        $tagId = (string)array_shift($list);
-        $revisionTime = (int)array_shift($list);
-        $unlockSeconds = (int)array_shift($list);
-        $hash = (string)array_shift($list);
-        $name = implode(self::DELIMITER, $list);
+        $list = \explode(self::DELIMITER, $data);
+        $tagId = (string)\array_shift($list);
+        $revisionTime = (int)\array_shift($list);
+        $unlockSeconds = (int)\array_shift($list);
+        $hash = (string)\array_shift($list);
+        $name = \implode(self::DELIMITER, $list);
 
         return [$revisionTime, $unlockSeconds, $hash, $name];
     }

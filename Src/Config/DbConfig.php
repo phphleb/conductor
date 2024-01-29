@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Base class for configuring mutexes from the database (for the HLEB framework).
  *
@@ -9,7 +7,7 @@ declare(strict_types=1);
 
 namespace Phphleb\Conductor\Src\Config;
 
-
+use Hleb\Static\Settings;
 use Phphleb\Conductor\Src\Scheme\BaseConfigInterface;
 use Phphleb\Conductor\Src\Scheme\DbConfigInterface;
 
@@ -29,26 +27,15 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
 
     public function __construct()
     {
-        if (!defined('HLEB_PARAMETERS_FOR_DB')) {
-            $configDir = defined('HLEB_SEARCH_DBASE_CONFIG_FILE') ?
-                HLEB_SEARCH_DBASE_CONFIG_FILE :
-                HLEB_GLOBAL_DIRECTORY . '/database';
-
-            $path = $configDir . '/dbase.config.php';
-            if (!file_exists($path)) {
-                $path = $configDir . '/default.dbase.config.php';
-            }
-            require $path;
-        }
-        $config = HLEB_PARAMETERS_FOR_DB[defined('HLEB_MUTEX_TYPE_DB') ? HLEB_MUTEX_TYPE_DB : HLEB_TYPE_DB];
-
+        $type = Settings::getParam('database', 'mutex.db.type');
+        $list = Settings::getParam('database', 'db.settings.list');
+        $config = $list[$type];
         $this->userName = $config["user"] ?? '';
-        $this->password = $config["pass"] ?? $config["password"] ?? '';
-
+        $this->password = $config["pass"] ?? '';
         $this->options = $config;
 
-        if(!class_exists("\PDO")) {
-            throw new \Exception('PHP extension `ext-pdo` must be installed');
+        if(!\class_exists("PDO")) {
+            throw new \ErrorException('PHP extension `ext-pdo` must be installed');
         }
     }
 
@@ -59,6 +46,7 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
      *
      * @return int
      */
+    #[\Override]
     public function getMaxLockTime(): int
     {
         return self::MAX_LOCK_TIME;
@@ -73,6 +61,7 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
      *
      * @return int
      */
+    #[\Override]
     public function getQueueWaitIntervalInUs(): int
     {
         return self::QUEUE_WAIT_INTERVAL;
@@ -85,21 +74,25 @@ class DbConfig implements DbConfigInterface, BaseConfigInterface
      *
      * @return array
      */
+    #[\Override]
     public function getParams(): array
     {
         return $this->options;
     }
 
+    #[\Override]
     public function getMutexTableName(): string
     {
         return self::MUTEX_TABLE_NAME;
     }
 
+    #[\Override]
     public function getUserName(): string
     {
         return $this->userName;
     }
 
+    #[\Override]
     public function getPassword(): string
     {
         return $this->password;

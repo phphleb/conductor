@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Class with a basic file configuration template (for the HLEB framework).
  *
@@ -9,6 +7,7 @@ declare(strict_types=1);
 
 namespace Phphleb\Conductor\Src\Config;
 
+use Hleb\Static\Settings;
 use Phphleb\Conductor\Src\Scheme\BaseConfigInterface;
 use Phphleb\Conductor\Src\Scheme\FileConfigInterface;
 
@@ -16,7 +15,7 @@ class FileConfig implements FileConfigInterface, BaseConfigInterface
 {
     protected const MAX_LOCK_TIME = 14400;
 
-    protected const STORAGE_BASE_PATH = HLEB_GLOBAL_DIRECTORY . '/storage/lib/mutex/tags';
+    protected const STORAGE_BASE_PATH = '@storage/lib/phphleb/conductor/tags';
 
     protected const FILE_EXTENSION = '.txt';
 
@@ -29,6 +28,7 @@ class FileConfig implements FileConfigInterface, BaseConfigInterface
      *
      * @return int
      */
+    #[\Override]
     public function getMaxLockTime(): int
     {
         return self::MAX_LOCK_TIME;
@@ -43,6 +43,7 @@ class FileConfig implements FileConfigInterface, BaseConfigInterface
      *
      * @return int
      */
+    #[\Override]
     public function getQueueWaitIntervalInUs(): int
     {
        return self::QUEUE_WAIT_INTERVAL;
@@ -55,9 +56,10 @@ class FileConfig implements FileConfigInterface, BaseConfigInterface
      *
      * @return string
      */
+    #[\Override]
     public function getStoragePath(): string
     {
-        return self::STORAGE_BASE_PATH;
+        return Settings::getPath(self::STORAGE_BASE_PATH);
     }
 
     /**
@@ -67,6 +69,7 @@ class FileConfig implements FileConfigInterface, BaseConfigInterface
      *
      * @return string
      */
+    #[\Override]
     public function getFileExtension(): string
     {
         return self::FILE_EXTENSION;

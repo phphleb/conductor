@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Class for the general operation of mutexes.
  *
@@ -58,12 +56,12 @@ class OriginMutex implements OriginMutexInterface
      * @return bool
      * @throws Exception
      */
-
+    #[\Override]
     public function acquire(?int $unlockSeconds = null): bool
     {
-        $this->unlockSeconds = $unlockSeconds >= 0 ?  (is_null($unlockSeconds) || $unlockSeconds > $this->config->getMaxLockTime() ? $this->config->getMaxLockTime() : $unlockSeconds) : 0;
+        $this->unlockSeconds = $unlockSeconds >= 0 ?  (\is_null($unlockSeconds) || $unlockSeconds > $this->config->getMaxLockTime() ? $this->config->getMaxLockTime() : $unlockSeconds) : 0;
 
-        if (!is_null($this->status)) {
+        if (!\is_null($this->status)) {
             throw new Exception('The method `acquire` has already been called.');
         }
         if ($this->unlockSeconds === 0) {
@@ -84,12 +82,13 @@ class OriginMutex implements OriginMutexInterface
      *
      * @return bool
      */
+    #[\Override]
     public function release(): bool
     {
         if ($this->unlockSeconds === 0) {
             return true;
         }
-        if (is_bool($this->status)) {
+        if (\is_bool($this->status)) {
             return $this->status;
         }
         if ($this->isCompleted()) {
@@ -110,12 +109,13 @@ class OriginMutex implements OriginMutexInterface
      *
      * @return bool
      */
+    #[\Override]
     public function unlock(): bool
     {
         if ($this->unlockSeconds === 0) {
             return true;
         }
-        if (is_bool($this->status)) {
+        if (\is_bool($this->status)) {
             return $this->status;
         }
         return $this->close();
@@ -132,12 +132,13 @@ class OriginMutex implements OriginMutexInterface
      *
      * @return bool
      */
+    #[\Override]
     public function isIntercepted(): bool
     {
         if ($this->unlockSeconds === 0) {
             return false;
         }
-        if (is_bool($this->status)) {
+        if (\is_bool($this->status)) {
             return !$this->status;
         }
         return !$this->storage->checkLockedTagExists();
@@ -150,9 +151,10 @@ class OriginMutex implements OriginMutexInterface
      *
      * @return bool
      */
+    #[\Override]
     public function isCompleted(): bool
     {
-        return time() > $this->revisionTime;
+        return \time() > $this->revisionTime;
     }
 
     /**
@@ -162,6 +164,7 @@ class OriginMutex implements OriginMutexInterface
      *
      * @return bool|null
      */
+    #[\Override]
     public function getStatus(): ?bool
     {
         return $this->status;
@@ -177,7 +180,7 @@ class OriginMutex implements OriginMutexInterface
     protected function wait(): bool
     {
         while (true) {
-            $this->startInterval = microtime(true);
+            $this->startInterval = \microtime(true);
             try {
                 if (!$this->storage->checkTagExists()) {
                     return true;
@@ -185,9 +188,8 @@ class OriginMutex implements OriginMutexInterface
             } catch (\Throwable $e) {
                 return false;
             }
-            usleep($this->config->getQueueWaitIntervalInUs());
+            \usleep($this->config->getQueueWaitIntervalInUs());
         }
-        return false;
     }
 
     /**
@@ -215,11 +217,12 @@ class OriginMutex implements OriginMutexInterface
      */
     protected function pause(): int
     {
-        $us = (int)((microtime(true) - $this->startInterval) * 1_000_000 * self::TIME_FACTOR);
+        $us = (int)((\microtime(true) - $this->startInterval) * 1_000_000 * self::TIME_FACTOR);
         if ($us < self::MIN_PAUSE) {
             $us = self::MIN_PAUSE;
         }
-        usleep($us);
+        \usleep($us);
+
         return $us;
     }
 
@@ -236,7 +239,7 @@ class OriginMutex implements OriginMutexInterface
             if (!$this->wait()) {
                 return false;
             }
-            $this->revisionTime = time() + $this->unlockSeconds;
+            $this->revisionTime = \time() + $this->unlockSeconds;
             if (!$this->storage->lockTag($this->unlockSeconds, $this->revisionTime)) {
                 return false;
             }
@@ -245,7 +248,6 @@ class OriginMutex implements OriginMutexInterface
                 return true;
             }
         }
-        return false;
     }
 }
 

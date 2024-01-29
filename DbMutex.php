@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 /**
  * @author  Foma Tuturov <fomiash@yandex.ru>
  */
@@ -21,24 +20,26 @@ use Phphleb\Conductor\Src\Storage\DB\DbStorage;
 
 class DbMutex extends MutexDirector
 {
-    protected static ?BaseConfigInterface $config = null;
+    protected ?BaseConfigInterface $config = null;
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function __construct(?BaseConfigInterface $config = null)
     {
-        if (is_null(self::$config)) {
-            self::$config = is_null($config) ? new DbConfig() : $config;
+        if ($this->config === null) {
+            $this->config = $config === null ? new DbConfig() : $config;
         }
     }
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function createMutex(string $name): OriginMutexInterface
     {
-        return new OriginMutex(new DbStorage($name,  self::$config));
+        return new OriginMutex(new DbStorage($name,  $this->config));
     }
 
 }

@@ -24,9 +24,9 @@ class FileTagStatistics
     private ?TagFileManager $tagManager = null;
 
     /**
-     * Возвращает информацию по активным мьютексам или отдельному мьютексу.
-     *
      * Returns information on active mutexes or an individual mutex.
+     *
+     * Возвращает информацию по активным мьютексам или отдельному мьютексу.
      *
      * @param string $name - mutex name, file name or file hash.
      *                     - название мьютекса, имя файла или хеш файла.
@@ -47,16 +47,16 @@ class FileTagStatistics
             }
 
         } else {
-            $files = glob($this->config->getStoragePath() . '/*' . $this->config->getFileExtension());
+            $files = \glob($this->config->getStoragePath() . '/*' . $this->config->getFileExtension());
 
             if ($files) {
                 $list = [];
                 foreach ($files as $file) {
-                    if (file_exists($file)) {
+                    if (\file_exists($file)) {
                         $list[] = $this->getFileInfo($file);
                     }
                 }
-                return implode($list);
+                return \implode($list);
 
             } else {
                 echo 'No active mutexes found.' . PHP_EOL;
@@ -76,13 +76,13 @@ class FileTagStatistics
     private function searchFile(string $name): ?string
     {
         $list = [
-            sha1($name) . '.txt',
+            \sha1($name) . '.txt',
             $name . '.txt',
             $name
         ];
         foreach ($list as $name) {
             $file = $this->config->getStoragePath() . '/' . $name;
-            if (file_exists($file)) {
+            if (\file_exists($file)) {
                 return $file;
             }
         }

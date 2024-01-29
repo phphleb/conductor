@@ -16,11 +16,11 @@ trait BaseStatisticsTrait
     private function getTagInfo(Tag $tag): string
     {
         $name = $tag->getName();
-        $tagId = sha1($name);
+        $tagId = \sha1($name);
         $startTime = $tag->getRevisionTime() - $tag->getUnlockSeconds();
-        $date = date("d-m-Y H:i:s", $startTime) . ' - ' . date("d-m-Y H:i:s", $tag->getRevisionTime());
+        $date = \date("d-m-Y H:i:s", $startTime) . ' - ' . \date("d-m-Y H:i:s", $tag->getRevisionTime());
         $expiredTime = $tag->getUnlockSeconds();
-        $passedTime = time() - $startTime;
+        $passedTime = \time() - $startTime;
         $lock = $passedTime <= $expiredTime ? 'lock' : 'EXPIRED';
 
         return $tagId . " | $date | $passedTime/$expiredTime sec. $lock  [$name]" . PHP_EOL;

@@ -1,0 +1,13 @@
+{
+  "component": "phphleb/conductor",
+  "name": "Mutexes for the HLEB framework",
+  "description": "Adding/removing the implementation of mutexes to the project.",
+  "directory": "files",
+  "settings": {
+    "mutex": {
+       "name": "mutex",
+       "default": "base",
+       "select": ["base"]
+     }
+  }
+}

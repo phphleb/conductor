@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Class for managing tag files for mutexes.
  *
@@ -48,7 +46,7 @@ class TagFileManager
      */
     public function tagToStringData(Tag $tag): string
     {
-        return implode(self::DELIMITER, [$tag->getRevisionTime(), $tag->getUnlockSeconds(), $tag->getHash(), $tag->getName()]);
+        return \implode(self::DELIMITER, [$tag->getRevisionTime(), $tag->getUnlockSeconds(), $tag->getHash(), $tag->getName()]);
     }
 
     /**
@@ -87,13 +85,13 @@ class TagFileManager
     public function stringToTagData(string $content): ?Tag
     {
         if ($content) {
-            $data = explode(self::DELIMITER, $content);
-            if (count($data) === 4) {
+            $data = \explode(self::DELIMITER, $content);
+            if (\count($data) === 4) {
                 return $this->valuesToTagData(
-                    (int)array_shift($data),
-                    (int)array_shift($data),
-                    (string)array_shift($data),
-                    (string)implode(self::DELIMITER, $data)
+                    (int)\array_shift($data),
+                    (int)\array_shift($data),
+                    (string)\array_shift($data),
+                    (string)\implode(self::DELIMITER, $data)
                 );
             }
         }
@@ -111,10 +109,10 @@ class TagFileManager
      */
     public function deleteRandomExpiredFile(): void
     {
-        $files = glob($this->config->getStoragePath() . '/*' . $this->config->getFileExtension());
+        $files = \glob($this->config->getStoragePath() . '/*' . $this->config->getFileExtension());
         if ($files) {
-            shuffle($files);
-            $files = array_slice($files, 0, 3, true);
+            \shuffle($files);
+            $files = \array_slice($files, 0, 3, true);
             foreach ($files as $file) {
                 $this->deleteExpiredFile($file);
             }
@@ -131,20 +129,20 @@ class TagFileManager
      */
     public function deleteExpiredFile(string $file): void
     {
-        if (file_exists($file)) {
+        if (\file_exists($file)) {
             $lockdata = $this->getFileContent($file);
             if ($lockdata) {
                 $lockdata = $this->stringToTagData($lockdata);
                 if ($lockdata) {
                     if ($lockdata->getRevisionTime() < time() &&
-                        $lockdata->getRevisionTime() - $lockdata->getUnlockSeconds() < time() - $this->config->getMaxLockTime()
+                        $lockdata->getRevisionTime() - $lockdata->getUnlockSeconds() < \time() - $this->config->getMaxLockTime()
                     ) {
                         $this->deleteFile($file);
                     }
                 }
             } else {
-                $filemtime = filemtime($file);
-                if (time() - $filemtime > $this->config->getMaxLockTime()) {
+                $filemtime = \filemtime($file);
+                if (\time() - $filemtime > $this->config->getMaxLockTime()) {
                     $this->deleteFile($file);
                 }
             }
@@ -162,7 +160,7 @@ class TagFileManager
      */
     public function deleteFile(string $file): bool
     {
-        return @unlink($file);
+        return @\unlink($file);
     }
 
     /**
@@ -176,7 +174,7 @@ class TagFileManager
      */
     public function getFileContent(string $file): ?string
     {
-        $content = @file($file, FILE_IGNORE_NEW_LINES)[0] ?? '';
+        $content = @\file($file, FILE_IGNORE_NEW_LINES)[0] ?? '';
         return !empty($content) ? $content : null;
     }
 

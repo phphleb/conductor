@@ -1,0 +1,28 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Commands\Mutex;
+
+use Exception;
+use Hleb\Base\Task;
+use Phphleb\Conductor\Src\Commands\DbTagStatistics;
+
+class DbStat extends Task
+{
+    /**
+     * DbMutex statistics.
+     * Returns information on active mutexes or an individual mutex.
+     *
+     * @param string|null $name - custom mutex name.
+     * @throws Exception
+     */
+    protected function run(?string $name = null): int
+    {
+        echo (new DbTagStatistics())->execute((string)$name);
+
+        return self::SUCCESS_CODE;
+    }
+
+}
+
+

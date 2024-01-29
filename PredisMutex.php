@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 /**
  * @author  Foma Tuturov <fomiash@yandex.ru>
  */
@@ -21,24 +20,26 @@ use Phphleb\Conductor\Src\Storage\Predis\PredisStorage;
 
 class PredisMutex extends MutexDirector
 {
-    protected static ?BaseConfigInterface $config = null;
+    protected ?BaseConfigInterface $config = null;
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function __construct(?BaseConfigInterface $config = null)
     {
-        if (is_null(self::$config)) {
-            self::$config = is_null($config) ? new PredisConfig() : $config;
+        if ($this->config === null) {
+            $this->config = $config === null ? new PredisConfig() : $config;
         }
     }
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function createMutex(string $name): OriginMutexInterface
     {
-        return new OriginMutex(new PredisStorage($name,  self::$config));
+        return new OriginMutex(new PredisStorage($name,  $this->config));
     }
 
 }

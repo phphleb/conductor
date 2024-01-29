@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 /**
  * @author  Foma Tuturov <fomiash@yandex.ru>
  */
@@ -13,7 +12,7 @@ declare(strict_types=1);
  * P.S. Queues where other processes are waiting to be unlocked are NON-SEQUENTIAL.
  * P.P.S. Files of a mutex type are usually applied only for one backend server; otherwise,
  * you can try to synchronize the folder with the tag files of mutexes. However, if it is possible,
- * it will be better to use mutexes based on storing the tags in the data base.
+ * it will be better to use mutexes based on storing the tags in the database.
 */
  /**
  * Класс для реализации мьютексов, основанных на работе файловых блокировок flock(..., LOCK_EX) в файлах-метках.
@@ -36,24 +35,26 @@ use Phphleb\Conductor\Src\Storage\File\FileStorage;
 
 class FileMutex extends MutexDirector
 {
-    protected static ?BaseConfigInterface $config = null;
+    protected ?BaseConfigInterface $config = null;
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function __construct(?BaseConfigInterface $config = null)
     {
-        if (is_null(self::$config)) {
-            self::$config = is_null($config) ? new FileConfig() : $config;
+        if ($this->config === null) {
+            $this->config = $config === null ? new FileConfig() : $config;
         }
     }
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function createMutex(string $name): OriginMutexInterface
     {
-        return new OriginMutex(new FileStorage($name,  self::$config));
+        return new OriginMutex(new FileStorage($name,  $this->config));
     }
 
 }

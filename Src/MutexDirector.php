@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * A template class for creating and managing mutex objects for inheritance.
  *
@@ -13,7 +11,11 @@ use Phphleb\Conductor\Src\Scheme\{MutexInterface, BaseConfigInterface, OriginMut
 
 abstract class MutexDirector implements MutexInterface
 {
-    protected static array $mutexList = [];
+    private static array $mutexList = [];
+
+    private static array $activeNames = [];
+
+    private static bool $registered = false;
 
     /**
      * In the constructor, you can set your own configuration.
@@ -31,41 +33,43 @@ abstract class MutexDirector implements MutexInterface
      * Фабричный метод.
      * Возвращает объект с интерфейсом `SpecificMutexInterface`.
      *
-     * @param string $mutexName - is a custom unique name for the mutex.
-     *                          - пользовательское уникальное название мьютекса.
+     * @param string $name - is a custom unique name for the mutex.
+     *                     - пользовательское уникальное название мьютекса.
      * @return OriginMutexInterface
      */
-    abstract protected function createMutex(string $mutexName): OriginMutexInterface;
+    abstract protected function createMutex(string $name): OriginMutexInterface;
 
     /**
      * Returns the result of the lock performed.
      *
      * Возвращает результат произведенной блокировки.
      *
-     * @param string $mutexName  - is a custom unique name for the mutex.
+     * @param string $mutexName - is a custom unique name for the mutex.
      *                           - пользовательское уникальное название мьютекса.
      *
      * @param int|null $unlockSeconds - sets the maximum blocking time in seconds.
-     * 
+     *
      *   not specified - the maximum value from the configuration.
      *   0 - cancels any blocking.
      *   14400 is the maximum default value (from configuration).
      *
      *                                 - устанавливает максимальное время блокировки в секундах.
-     * 
+     *
      *   не указано - максимальное значение из конфигурации.
      *   0 - отмена всякой блокировки.
      *   14400 - максимальное значение по умолчанию (из конфигурации).
-     * 
+     *
      * @return bool
      * @throws MutexException
      */
-    public function acquire(string $mutexName, ?int $unlockSeconds = null): bool
+    #[\Override]
+    final public function acquire(string $mutexName, ?int $unlockSeconds = null): bool
     {
         if (!isset(self::$mutexList[$mutexName])) {
             try {
                 self::$mutexList[$mutexName] = $this->createMutex($mutexName);
-                $this->init(self::$mutexList[$mutexName]);
+                self::$activeNames[] = $mutexName;
+                $this->registerHandler();
 
                 return self::$mutexList[$mutexName]->acquire($unlockSeconds);
             } catch (\Throwable $e) {
@@ -89,7 +93,8 @@ abstract class MutexDirector implements MutexInterface
      * @return bool
      * @throws MutexException
      */
-    public function release(string $mutexName): bool
+    #[\Override]
+    final public function release(string $mutexName): bool
     {
         if (isset(self::$mutexList[$mutexName])) {
             try {
@@ -115,7 +120,8 @@ abstract class MutexDirector implements MutexInterface
      * @return bool
      * @throws MutexException
      */
-    public function unlock(string $mutexName): bool
+    #[\Override]
+    final public function unlock(string $mutexName): bool
     {
         if (isset(self::$mutexList[$mutexName])) {
             try {
@@ -141,7 +147,8 @@ abstract class MutexDirector implements MutexInterface
      * @return bool
      * @throws MutexException
      */
-    public function isIntercepted(string $mutexName): bool
+    #[\Override]
+    final public function isIntercepted(string $mutexName): bool
     {
         if (isset(self::$mutexList[$mutexName])) {
             try {
@@ -163,7 +170,8 @@ abstract class MutexDirector implements MutexInterface
      * @return bool
      * @throws MutexException
      */
-    public function isCompleted(string $mutexName): bool
+    #[\Override]
+    final public function isCompleted(string $mutexName): bool
     {
         if (isset(self::$mutexList[$mutexName])) {
             try {
@@ -175,15 +183,48 @@ abstract class MutexDirector implements MutexInterface
         throw new MutexException($mutexName, "A mutex with a name `$mutexName` (method `isCompleted`) has not been initialized.");
     }
 
-
-
-    private function init(OriginMutexInterface $mutex): void
+    /**
+     * When used asynchronously, you must execute this method
+     * at the end of each loop.
+     * 
+     * При асинхронном использовании необходимо выполнять
+     * этот метод в конце каждого цикла.
+     */
+    final public static function rollback(): void
     {
-        register_shutdown_function(function () use ($mutex) {
-            if (is_null($mutex->getStatus())) {
-                $mutex->unlock();
-            }
+        self::cancelOnCompletion();
+        self::$mutexList = [];
+        self::$activeNames = [];
+    }
+
+
+    /**
+     * Release the mutex when the script terminates.
+     *
+     * Освобождение мьютекса при завершении скрипта.
+     */
+    private function registerHandler(): void
+    {
+        if (self::$registered) {
+            return;
+        }
+        self::$registered = true;
+        \register_shutdown_function(function () {
+            self::cancelOnCompletion();
         });
+
+    }
+
+    private static function cancelOnCompletion(): void
+    {
+        $list = self::$activeNames;
+        foreach ($list as $name) {
+            if (isset(self::$mutexList[$name])) {
+                if (self::$mutexList[$name]->getStatus() === null) {
+                    self::$mutexList[$name]->unlock();
+                }
+            }
+        }
     }
 
 }

@@ -22,9 +22,9 @@ class PredisTagStatistics
     private ?PredisConfigInterface $config = null;
 
     /**
-     * Возвращает информацию по активным мьютексам или отдельному мьютексу.
-     *
      * Returns information on active mutexes or an individual mutex.
+     *
+     * Возвращает информацию по активным мьютексам или отдельному мьютексу.
      *
      * @param string $id - mutex ID.
      *                   - идентификатор мьютекса.
@@ -48,7 +48,7 @@ class PredisTagStatistics
                 foreach ($tags as $tag) {
                     $list[] = $this->getTagInfo($tag);
                 }
-                return implode($list);
+                return \implode($list);
             } else {
                 return 'No active mutexes found.' . PHP_EOL;
             }

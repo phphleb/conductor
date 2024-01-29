@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * A handler for requests to the file store of mutexes.
  *
@@ -26,7 +24,7 @@ class FileStorage extends BaseStorage implements StorageInterface
 
     protected string $processHash;
 
-    protected static TagFileManager $tagManager;
+    protected TagFileManager $tagManager;
 
     protected int $unlockSeconds = 0;
 
@@ -37,13 +35,14 @@ class FileStorage extends BaseStorage implements StorageInterface
         $this->mutexName = $mutexName;
         $this->mutexId = $this->generateIdFromName($mutexName);
         $this->config = $config;
-        $this->processHash = microtime(true) . '-' . rand();
-        self::$tagManager = new TagFileManager($config);
+        $this->processHash = \microtime(true) . '-' . \rand();
+        $this->tagManager = new TagFileManager($config);
     }
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function getConfig(): BaseConfigInterface
     {
         return $this->config;
@@ -52,6 +51,7 @@ class FileStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function lockTag(int $unlockSeconds, int $revisionTime): bool
     {
         $this->unlockSeconds = $unlockSeconds;
@@ -60,13 +60,13 @@ class FileStorage extends BaseStorage implements StorageInterface
 
         $this->prepareFileResources();
 
-        $this->fp = fopen($this->getFilePath(), "c+");
+        $this->fp = \fopen($this->getFilePath(), "c+");
 
         if ($this->fp === false) {
             return false;
         }
 
-        flock($this->fp, LOCK_EX);
+        \flock($this->fp, LOCK_EX);
 
         return $this->createFile();
     }
@@ -74,11 +74,12 @@ class FileStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function checkLockedTagExists(): bool
     {
-        $content = self::$tagManager->getFileContent($this->getFilePath());
+        $content = $this->tagManager->getFileContent($this->getFilePath());
         if ($content) {
-            $tag = self::$tagManager->stringToTagData($content);
+            $tag = $this->tagManager->stringToTagData($content);
             $hash = $tag->getHash();
             unset($content, $tag);
             
@@ -90,15 +91,16 @@ class FileStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function checkTagExists(): bool
     {
-        $content = self::$tagManager->getFileContent($this->getFilePath());
+        $content = $this->tagManager->getFileContent($this->getFilePath());
         if ($content) {
-            $tag = self::$tagManager->stringToTagData($content);
+            $tag = $this->tagManager->stringToTagData($content);
             $revisionTime = $tag->getRevisionTime();
             unset($content, $tag);
             
-            return $revisionTime >= time();
+            return $revisionTime >= \time();
         }
         return false;
     }
@@ -106,6 +108,7 @@ class FileStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function unlockTag(): bool
     {
         $this->unblockFp();
@@ -115,9 +118,9 @@ class FileStorage extends BaseStorage implements StorageInterface
     protected function unblockFp(): bool
     {
         if (isset($this->fp, $this->fp) && $this->fp) {
-            @ftruncate($this->fp, 0);
-            @flock($this->fp, LOCK_UN);
-            @fclose($this->fp);
+            @\ftruncate($this->fp, 0);
+            @\flock($this->fp, LOCK_UN);
+            @\fclose($this->fp);
             $this->fp = null;
         }
         return false;
@@ -126,10 +129,10 @@ class FileStorage extends BaseStorage implements StorageInterface
     protected function deleteThisTagIfNotIntended(): bool
     {
         $file = $this->getFilePath();
-        if (file_exists($file)) {
-            $tag = self::$tagManager->getTagData($file);
+        if (\file_exists($file)) {
+            $tag = $this->tagManager->getTagData($file);
             if (!$tag || $tag->getHash() === $this->processHash) {
-                return self::$tagManager->deleteFile($file);
+                return $this->tagManager->deleteFile($file);
             }
         }
         return true;
@@ -138,21 +141,21 @@ class FileStorage extends BaseStorage implements StorageInterface
     protected function createFile(): bool
     {
         try {
-            if (ftruncate($this->fp, 0) === false) {
+            if (\ftruncate($this->fp, 0) === false) {
                 return $this->unblockFp();
             }
-            $content = self::$tagManager->tagToStringData(
-                self::$tagManager->valuesToTagData(
+            $content = $this->tagManager->tagToStringData(
+                $this->tagManager->valuesToTagData(
                     $this->revisionTime,
                     $this->unlockSeconds,
                     $this->processHash,
                     $this->mutexName
                 )
             );
-            if (fputs($this->fp, $content) === false) {
+            if (\fputs($this->fp, $content) === false) {
                 return $this->unblockFp();
             }
-            if (fflush($this->fp) === false) {
+            if (\fflush($this->fp) === false) {
                 return $this->unblockFp();
             }
         } catch (Throwable $e) {
@@ -164,11 +167,11 @@ class FileStorage extends BaseStorage implements StorageInterface
     protected function checkAndCreateDirectory(): bool
     {
         $directory = $this->config->getStoragePath();
-        $result = is_dir($directory);
+        $result = \is_dir($directory);
         if (!$result) {
-            mkdir($directory, 0775, true);
+            \mkdir($directory, 0775, true);
         }
-        if (!is_writable($directory)) {
+        if (!\is_writable($directory)) {
             throw new Exception("The directory $directory is not available for writing files.");
         }
         return $result;
@@ -179,20 +182,22 @@ class FileStorage extends BaseStorage implements StorageInterface
         return $this->config->getStoragePath() . DIRECTORY_SEPARATOR . $this->mutexId . $this->config->getFileExtension();
     }
 
+    /**
+     * @throws Exception
+     */
     protected function prepareFileResources(): void
     {
         if ($this->checkAndCreateDirectory()) {
-            if (rand(0, 5) === 1) {
-                self::$tagManager->deleteRandomExpiredFile($this->config);
+            if (\rand(0, 5) === 1) {
+                $this->tagManager->deleteRandomExpiredFile();
             }
         }
     }
 
     protected function generateIdFromName(string $name): string
     {
-        return sha1($name);
+        return \sha1($name);
     }
-
 
 }
 

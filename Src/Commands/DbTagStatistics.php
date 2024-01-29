@@ -23,9 +23,9 @@ class DbTagStatistics
     private ?DbConfigInterface $config = null;
 
     /**
-     * Возвращает информацию по активным мьютексам или отдельному мьютексу.
-     *
      * Returns information on active mutexes or an individual mutex.
+     *
+     * Возвращает информацию по активным мьютексам или отдельному мьютексу.
      *
      * @param string $name - custom mutex name.
      *                     - пользовательское название мьютекса.
@@ -50,7 +50,7 @@ class DbTagStatistics
                 foreach ($tags as $tag) {
                     $list[] = $this->getTagInfo($tag);
                 }
-                return implode($list);
+                return \implode($list);
             } else {
                 return 'No active mutexes found.' . PHP_EOL;
             }

@@ -1,5 +1,6 @@
+/* If the table is not created automatically, then run this code. */
 
-/* MySQL/MariaDB   */
+/* MySQL/MariaDB */
 CREATE TABLE IF NOT EXISTS mutex_auto_tags (
     tag VARCHAR(50) NOT NULL PRIMARY KEY, /* Limited quantity */
     title VARCHAR(250) NOT NULL UNIQUE KEY,
@@ -9,7 +10,7 @@ CREATE TABLE IF NOT EXISTS mutex_auto_tags (
     date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-/* PostgreSQL  */
+/* PostgreSQL */
 CREATE TABLE IF NOT EXISTS mutex_auto_tags (
     tag VARCHAR(50) NOT NULL,
     title VARCHAR(250) NOT NULL,

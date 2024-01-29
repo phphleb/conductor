@@ -1,9 +1,12 @@
- ### Use of mutexes in a project (including projects based on the HLEB micro framework)
  
+### Use of mutexes in a project (including projects based on the HLEB2 framework)
+
+
+![PHP](https://img.shields.io/badge/PHP-^8.2-blue) [![License: MIT](https://img.shields.io/badge/License-MIT%20(Free)-brightgreen.svg)](https://github.com/phphleb/hleb/blob/master/LICENSE)
+
+
 The use of mutexes is worthwhile in cases, when access to any code is to be locked, until it is executed in the current process or the set locking time period expires. 
 For example, repetitive simultaneous API requests can cause a parallel recording one and the same value into the data base. In order to avoid such event, a section of the code responsible for recording is to be transformed by mutex methods. There are only three such mutex methods: `acquire`, `release` and `unlock`.
-
-[Link to instructions](https://phphleb.ru/ru/v1/examples/#exampleMT7) (RU)
   
  ### FileMutex
 ```php
@@ -32,13 +35,13 @@ When setting the time period for locking (the second argument `acquire` in secon
 #### Installation in a project based on the framework HLEB
 
  ```bash
- $ composer require phphleb/conductor
+composer require phphleb/conductor
 ```
-Create a console commands `php console mutex/mutex-db-stat-task`, `php console mutex/mutex-predis-stat-task` and `php console mutex/mutex-file-stat-task` to get statistics on active mutexes:
+Create a console commands `php console mutex/db-stat`, `php console mutex/predis-stat` and `php console mutex/file-stat` to get statistics on active mutexes:
  ```bash
- $ php console phphleb/conductor --add
+php console phphleb/conductor add
 
- $ composer dump-autoload
+composer dump-autoload
  ```
 #### Installation in another project
 
@@ -73,17 +76,21 @@ use \Phphleb\Conductor\DbMutex;
 $mutex = new DbMutex();
 
 ```
+
+By default, the configuration settings are taken from the `mutex.db.type` (config/database.php).
+
 Supported  __MySQL__ / __MariaDB__ / __PostgreSQL__.
 
 
  ### PredisMutex
  
- Redis is connected in the same way.
+Redis is connected in the same way.
  
   ```bash
-  $ composer require predis/predis
+composer require phphleb/hredis
  ```
- 
+Requires [predis/predis](https://github.com/predis/predis) library.
+
  ```php
  use \Phphleb\Conductor\PredisMutex;
  
@@ -91,11 +98,4 @@ Supported  __MySQL__ / __MariaDB__ / __PostgreSQL__.
  
  ```
 
-By default, the configuration settings are taken from the `HLEB_TYPE_REDIS` or default `HLEB_TYPE_DB` constant (database/dbase.config.php).
-
-
-
- 
------------------------------------
-
-[![License: MIT](https://img.shields.io/badge/License-MIT%20(Free)-brightgreen.svg)](https://github.com/phphleb/draft/blob/main/LICENSE) ![PHP](https://img.shields.io/badge/PHP-^7.4.0-blue) ![PHP](https://img.shields.io/badge/PHP-8-blue)
+The configuration will be loaded from the `redis.db.type` setting.

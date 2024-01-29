@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * A query processor for a database-based mutex store.
  *
@@ -22,7 +20,7 @@ class DbStorage extends BaseStorage implements StorageInterface
 
     protected DbConfigInterface $config;
 
-    protected static ?TagDbManager $tagManager = null;
+    protected ?TagDbManager $tagManager = null;
 
     protected int $unlockSeconds = 0;
 
@@ -35,16 +33,14 @@ class DbStorage extends BaseStorage implements StorageInterface
         $this->mutexName = $mutexName;
         $this->mutexId = $this->generateIdFromName($mutexName);
         $this->config = $config;
-        $this->processHash = microtime(true) . '-' . rand();
-
-        if (is_null(self::$tagManager)) {
-            self::$tagManager = new TagDbManager($config);
-        }
+        $this->processHash = \microtime(true) . '-' . \rand();
+        $this->tagManager = new TagDbManager($config);
     }
 
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function getConfig(): BaseConfigInterface
     {
         return $this->config;
@@ -53,6 +49,7 @@ class DbStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function lockTag(int $unlockSeconds, int $revisionTime): bool
     {
         $this->unlockSeconds = $unlockSeconds;
@@ -67,53 +64,53 @@ class DbStorage extends BaseStorage implements StorageInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function checkTagExists(): bool
     {
-        $revisionTime = self::$tagManager->getTagRevisionTime($this->mutexId);
+        $revisionTime = $this->tagManager->getTagRevisionTime($this->mutexId);
         if ($revisionTime) {
-            return $revisionTime >= time();
+            return $revisionTime >= \time();
         }
         return false;
     }
     
     /**
      * @inheritDoc
-     */   
+     */
+    #[\Override]
     public function checkLockedTagExists(): bool
     {
-        return self::$tagManager->getLockTagExists($this->mutexId, $this->processHash);
+        return $this->tagManager->getLockTagExists($this->mutexId, $this->processHash);
     }
     
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function unlockTag(): bool
     {
-        return self::$tagManager->deleteLockedTag($this->mutexId, $this->processHash);
+        return $this->tagManager->deleteLockedTag($this->mutexId, $this->processHash);
     }
     
-    /**
-     * @inheritDoc
-     */
     protected function generateIdFromName(string $name): string
     {
-        return sha1($name);
+        return \sha1($name);
     }
     
     protected function prepareDbResources(): void
     {
-        if (!self::$tagManager->checkAndCreateTable()) {
-            if (rand(0, 5) === 1) {
-                self::$tagManager->deleteExpiredTags();
+        if (!$this->tagManager->checkAndCreateTable()) {
+            if (\rand(0, 5) === 1) {
+                $this->tagManager->deleteExpiredTags();
             }
         }
     }
 
     protected function createTag(): bool
     {
-        return self::$tagManager->saveTag(
+        return $this->tagManager->saveTag(
             $this->mutexId,
-            self::$tagManager->valuesToTagData(
+            $this->tagManager->valuesToTagData(
                 $this->revisionTime,
                 $this->unlockSeconds,
                 $this->processHash,
