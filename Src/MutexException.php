@@ -9,7 +9,7 @@ namespace Phphleb\Conductor\Src;
 
 class MutexException extends \Exception
 {
-    public function __construct(string $mutexName, string $message, $code = 0, \Throwable $previous = null)
+    public function __construct(string $mutexName, string $message, $code = 0, ?\Throwable $previous = null)
     {
         parent::__construct("[Mutex name: $mutexName] $message", $code, $previous);
     }
